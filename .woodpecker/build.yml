@@ -1,0 +1,22 @@
+---
+pipeline:
+  build:
+    image: archlinux:base-devel
+    commands: |
+      pacman -Syu xmlto kmod inetutils bc libelf git cpio perl tar xz base-devel --noconfirm
+      make olddefconfig
+      make -j$(nproc)
+  build-rust:
+    image: archlinux:base-devel
+    commands: |
+      pacman -Syu clang llvm lld base-devel xmlto kmod inetutils bc libelf git cpio perl tar xz --noconfirm
+      curl https://sh.rustup.rs -sSf | bash -s -- -y
+      source $HOME/.cargo/env
+      rustc --version
+      rustup override set $(scripts/min-tool-version.sh rustc)
+      rustup component add rust-src
+      cargo install --locked --version $(scripts/min-tool-version.sh bindgen) bindgen
+      rustup component add rustfmt
+      rustup component add clippy
+      make LLVM=1 olddefconfig
+      make LLVM=1 -j$(nproc)
