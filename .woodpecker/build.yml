@@ -1,5 +1,5 @@
 ---
-pipeline:
+steps:
   build:
     image: archlinux:base-devel
     commands: |
@@ -20,3 +20,9 @@ pipeline:
       rustup component add clippy
       make LLVM=1 olddefconfig
       make LLVM=1 -j$(nproc)
+  build:
+    image: archlinux:base-devel
+    commands: |
+      pacman -Syu xmlto kmod inetutils bc libelf git cpio perl tar xz base-devel aarch64-linux-gnu-gcc --noconfirm
+      make -j$(nproc) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig
+      make -j$(nproc) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- all
